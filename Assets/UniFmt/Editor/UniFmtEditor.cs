@@ -8,9 +8,8 @@ using System.Diagnostics;
 using System.Threading;
 
 /// <summary>
-/// Astyle Format を Unityから利用するためのエディター拡張です。
-/// Astyleについて(https://qiita.com/hakuta/items/29c988181d40829b1679)
-/// ソースコードのフォーマットを統一するために追加しました。
+/// UniFmt is editor extension of able to use program format of `astyle` from GUI.
+/// in advance, need install `astyle` from http://astyle.sourceforge.net/
 /// </summary>
 public class UniFmtEditor : EditorWindow {
 	private List<string> files;
@@ -20,19 +19,26 @@ public class UniFmtEditor : EditorWindow {
 	private bool maskDirectory;
 	private string maskText;
 
-	private static readonly string ASTYLE_PATH_KEY = "CodeFormat.AstylePath";
+	private static readonly string ASTYLE_PATH_KEY = "UniFmt.AstylePath";
 	private string FORMAT_SETTING;
 
-	[MenuItem("Editor/CodeFormat")]
+	[MenuItem("UniFmt/Help")]
+	static void ShowHelp() {
+		EditorUtility.DisplayDialog(
+			"- UniFmt -",
+			"please install a astyle from following url: http://astyle.sourceforge.net/",
+			"OK",
+			"Cancel"
+		);
+	}
+
+	[MenuItem("UniFmt/Format")]
 	static void CreateWindow() {
 		UniFmtEditor window = (UniFmtEditor)EditorWindow.GetWindow(typeof(UniFmtEditor));
 		window.Init();
 		window.Show();
 	}
 
-	/// <summary>
-	/// フォーマット対象となるファイルの一覧を取得します。
-	/// </summary>
 	private void Init() {
 		this.FORMAT_SETTING = Application.dataPath + "/UniFmt/Editor/csfmt.txt";
 		this.files = new List<string>();
@@ -66,13 +72,13 @@ public class UniFmtEditor : EditorWindow {
 		}
 
 		if (GUILayout.Button("Format All")) {
-			FormatAll(files, "全てのファイルをフォーマットします。\nよろしいですか？");
+			FormatAll(files, "format a all files.\nit is ok?");
 			Close();
 			return;
 		}
 
 		if (GUILayout.Button("Format All(Filtered)")) {
-			FormatAll(GetFilteredFiles(), "フィルタされた全てのファイルをフォーマットします。\nよろしいですか？");
+			FormatAll(GetFilteredFiles(), "format a filtered all files.\nit is ok?");
 			Close();
 			return;
 		}
@@ -85,17 +91,12 @@ public class UniFmtEditor : EditorWindow {
 		EditorGUILayout.EndScrollView();
 	}
 
-	/// <summary>
-	/// 対象のファイルを全てフォーマットします。
-	/// </summary>
-	/// <param name="targetFiles">Target files.</param>
-	/// <param name="message">Message.</param>
 	private void FormatAll(List<string> targetFiles, string message) {
 		bool result = EditorUtility.DisplayDialog(
-						  "- CodeFormat -",
+						  "- UniFmt -",
 						  message,
 						  "OK",
-						  "取消し"
+						  "Cancel"
 					  );
 
 		if (!result) {
@@ -108,32 +109,23 @@ public class UniFmtEditor : EditorWindow {
 		AssetDatabase.Refresh();
 	}
 
-	/// <summary>
-	/// 検索バーを描画。
-	/// </summary>
 	private void ShowSearchBar() {
 		EditorGUILayout.BeginHorizontal();
-		EditorGUILayout.LabelField("search:");
+		EditorGUILayout.LabelField("Search:");
 		this.searchText = EditorGUILayout.TextField(searchText);
 		EditorGUILayout.EndHorizontal();
 	}
 
-	/// <summary>
-	/// ディレクトリでマスクするためのテキストフィールドを描画します。
-	/// </summary>
 	private void ShowMaskDirectory() {
 		EditorGUILayout.BeginHorizontal();
-		this.maskDirectory = GUILayout.Toggle(maskDirectory, "ディレクトリマスク");
+		this.maskDirectory = GUILayout.Toggle(maskDirectory, "DirectoryMask");
 		this.maskText = EditorGUILayout.TextField(maskText);
 		EditorGUILayout.EndHorizontal();
 	}
 
-	/// <summary>
-	/// Astyleの実行ファイルへのパスを設定するUI。
-	/// </summary>
 	private void ShowExecutableFileBar() {
 		EditorGUILayout.BeginHorizontal();
-		EditorGUILayout.LabelField("astyle path:");
+		EditorGUILayout.LabelField("astyle Path(File):");
 		var temp = astylePath;
 		//値が変更されていたので更新
 		this.astylePath = EditorGUILayout.TextField(astylePath);
@@ -146,11 +138,6 @@ public class UniFmtEditor : EditorWindow {
 		EditorGUILayout.EndHorizontal();
 	}
 
-	/// <summary>
-	/// 指定のパスがマスクとマッチするなら true.
-	/// </summary>
-	/// <returns><c>true</c>, if mask was checked, <c>false</c> otherwise.</returns>
-	/// <param name="pathname">Pathname.</param>
 	private bool CheckMask(string pathname) {
 		if (!maskDirectory) {
 			return true;
@@ -164,9 +151,6 @@ public class UniFmtEditor : EditorWindow {
 		return maskDirectory && dirname.Contains(maskText);
 	}
 
-	/// <summary>
-	/// フォーマット対象一覧の表示。
-	/// </summary>
 	private void ShowFileList() {
 		foreach (var pathname in GetFilteredFiles()) {
 			var filename = Path.GetFileName(pathname);
@@ -181,22 +165,16 @@ public class UniFmtEditor : EditorWindow {
 		}
 	}
 
-	/// <summary>
-	/// 検索やディレクトリマスクによってフィルタされたパスの一覧を返します。
-	/// </summary>
-	/// <returns>The filtered files.</returns>
 	private List<string> GetFilteredFiles() {
 		var ret = new List<string>();
 
 		foreach (var pathname in files) {
 			var filename = Path.GetFileName(pathname);
 
-			//マスクが有効でパスが含まれない
 			if (!CheckMask(pathname)) {
 				continue;
 			}
 
-			//検索テキストが含まれない
 			if (searchText.Length > 0 && !filename.Contains(searchText)) {
 				continue;
 			}
