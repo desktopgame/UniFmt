@@ -34,7 +34,7 @@ public class CodeFormat : EditorWindow {
 	/// フォーマット対象となるファイルの一覧を取得します。
 	/// </summary>
 	private void Init() {
-		this.FORMAT_SETTING = Application.dataPath + "/Editor/csfmt.txt";
+		this.FORMAT_SETTING = Application.dataPath + "/UniFmt/Editor/csfmt.txt";
 		this.files = new List<string>();
 		this.astylePath = PlayerPrefs.GetString(ASTYLE_PATH_KEY, "astyle");
 		var assets = Application.dataPath;
