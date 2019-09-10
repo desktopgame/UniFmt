@@ -53,7 +53,7 @@ public class CodeFormat : EditorWindow {
 		}
 
 		if (!File.Exists(FORMAT_SETTING)) {
-			EditorGUILayout.LabelField(string.Format("{0}: not found", FORMAT_SETTING), FORMAT_SETTING);
+			EditorGUILayout.LabelField(string.Format("{0}: No such file.", FORMAT_SETTING));
 			return;
 		}
 
