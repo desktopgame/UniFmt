@@ -12,7 +12,7 @@ using System.Threading;
 /// Astyleについて(https://qiita.com/hakuta/items/29c988181d40829b1679)
 /// ソースコードのフォーマットを統一するために追加しました。
 /// </summary>
-public class CodeFormat : EditorWindow {
+public class UniFmtEditor : EditorWindow {
 	private List<string> files;
 	private Vector2 scrollPos = Vector2.zero;
 	private string searchText = "";
@@ -25,7 +25,7 @@ public class CodeFormat : EditorWindow {
 
 	[MenuItem("Editor/CodeFormat")]
 	static void CreateWindow() {
-		CodeFormat window = (CodeFormat)EditorWindow.GetWindow(typeof(CodeFormat));
+		UniFmtEditor window = (UniFmtEditor)EditorWindow.GetWindow(typeof(UniFmtEditor));
 		window.Init();
 		window.Show();
 	}
