@@ -22,7 +22,7 @@ public class UniFmtEditor : EditorWindow {
 	private static readonly string ASTYLE_PATH_KEY = "UniFmt.AstylePath";
 	private string FORMAT_SETTING;
 
-	[MenuItem("UniFmt/Help")]
+	[MenuItem("Assets/UniFmt/Help")]
 	static void ShowHelp() {
 		EditorUtility.DisplayDialog(
 			"- UniFmt -",
@@ -32,7 +32,7 @@ public class UniFmtEditor : EditorWindow {
 		);
 	}
 
-	[MenuItem("UniFmt/Format")]
+	[MenuItem("Assets/UniFmt/Format")]
 	static void CreateWindow() {
 		UniFmtEditor window = (UniFmtEditor)EditorWindow.GetWindow(typeof(UniFmtEditor));
 		window.Init();
