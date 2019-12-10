@@ -20,7 +20,7 @@ public class UniFmtEditor : EditorWindow {
 	private string maskText;
 
 	private static readonly string ASTYLE_PATH_KEY = "UniFmt.AstylePath";
-	private string FORMAT_SETTING {
+	private static string FORMAT_SETTING {
 		get { return Application.dataPath + "/UniFmt/Editor/csfmt.txt"; }
 	}
 
@@ -32,6 +32,52 @@ public class UniFmtEditor : EditorWindow {
 			"OK",
 			"Cancel"
 		);
+	}
+
+	[MenuItem("Assets/UniFmt/Setup")]
+	static void Setup() {
+		if(File.Exists(FORMAT_SETTING)) {
+			File.Delete(FORMAT_SETTING);
+		}
+		var strBuf = new System.Text.StringBuilder();
+		strBuf.AppendLine("#");
+		strBuf.AppendLine("# CodeFormat.cs で使用されます。");
+		strBuf.AppendLine("#");
+		strBuf.AppendLine("");
+		strBuf.AppendLine("# c#のファイルとして認識する");
+		strBuf.AppendLine("mode=cs");
+		strBuf.AppendLine("# allmanスタイルにする");
+		strBuf.AppendLine("style=java");
+		strBuf.AppendLine("# インデントにタブを使う");
+		strBuf.AppendLine("indent=tab=4");
+		strBuf.AppendLine("# 継続行のインデントにもタブを使う(但し偶数個のタブでないときはwhite spaceで埋められる)");
+		strBuf.AppendLine("indent=force-tab=4");
+		strBuf.AppendLine("# namespace文の中をインデントする");
+		strBuf.AppendLine("indent-namespaces");
+		strBuf.AppendLine("# switch文の中をインデントする");
+		strBuf.AppendLine("indent-switches");
+		strBuf.AppendLine("# case文の中をインデントする");
+		strBuf.AppendLine("indent-cases");
+		strBuf.AppendLine("# 1行ブロックを許可する");
+		strBuf.AppendLine("keep-one-line-blocks");
+		strBuf.AppendLine("# 1行文を許可する");
+		strBuf.AppendLine("keep-one-line-statements");
+		strBuf.AppendLine("# プリプロセッサをソースコード内のインデントと合わせる");
+		strBuf.AppendLine("indent-preproc-cond");
+		strBuf.AppendLine("# if, while, switchの後にpaddingを入れる");
+		strBuf.AppendLine("pad-header");
+		strBuf.AppendLine("# 演算子の前後にpaddingを入れる");
+		strBuf.AppendLine("pad-oper");
+		strBuf.AppendLine("# originalファイルを生成しない");
+		strBuf.AppendLine("suffix=none");
+		strBuf.AppendLine("# if, for, while文の前後に空行を入れる");
+		strBuf.AppendLine("break-blocks");
+		strBuf.AppendLine("# コメントもインデントする");
+		strBuf.AppendLine("indent-col1-comments");
+		strBuf.AppendLine("#カンマの間にスペース");
+		strBuf.AppendLine("pad-comma");
+		File.WriteAllText(FORMAT_SETTING, strBuf.ToString());
+		AssetDatabase.Refresh();
 	}
 
 	[MenuItem("Assets/UniFmt/Format")]
