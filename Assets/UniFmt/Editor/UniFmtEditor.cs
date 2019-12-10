@@ -20,7 +20,9 @@ public class UniFmtEditor : EditorWindow {
 	private string maskText;
 
 	private static readonly string ASTYLE_PATH_KEY = "UniFmt.AstylePath";
-	private string FORMAT_SETTING;
+	private string FORMAT_SETTING {
+		get { return Application.dataPath + "/UniFmt/Editor/csfmt.txt"; }
+	}
 
 	[MenuItem("Assets/UniFmt/Help")]
 	static void ShowHelp() {
@@ -40,7 +42,6 @@ public class UniFmtEditor : EditorWindow {
 	}
 
 	private void Init() {
-		this.FORMAT_SETTING = Application.dataPath + "/UniFmt/Editor/csfmt.txt";
 		this.files = new List<string>();
 		this.astylePath = PlayerPrefs.GetString(ASTYLE_PATH_KEY, "astyle");
 		var assets = Application.dataPath;
