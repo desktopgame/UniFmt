@@ -30,9 +30,9 @@ public class UniFmtEditor : EditorWindow {
 	private static string DOWNLOAD_ARCHIVE {
 		get {
 			#if UNITY_STANDALONE_OSX || UNITY_STANDALONE_LINUX
-				return DOWNLOAD_DIR + "data.tar.gz";
+			return DOWNLOAD_DIR + "data.tar.gz";
 			#else
-				return DOWNLOAD_DIR + "data.zip";
+			return DOWNLOAD_DIR + "data.zip";
 			#endif
 		}
 	}
@@ -55,13 +55,12 @@ public class UniFmtEditor : EditorWindow {
 	}
 
 	private static void DownloadAstyle() {
-		if(File.Exists(DOWNLOAD_ARCHIVE)) {
-			return;
-		}
 		UnityEngine.Debug.Log("Download Astyle...");
-		if(!Directory.Exists(DOWNLOAD_DIR)) {
+
+		if (!Directory.Exists(DOWNLOAD_DIR)) {
 			Directory.CreateDirectory(DOWNLOAD_DIR);
 		}
+
 		// download astyle
 		var cli = new WebClient();
 		byte[] data = cli.DownloadData("https://sourceforge.net/projects/astyle/files/latest/download");
@@ -69,15 +68,30 @@ public class UniFmtEditor : EditorWindow {
 		//unzip
 		#if UNITY_STANDALONE_OSX || UNITY_STANDALONE_LINUX
 		DoBashCommand($"tar -xzf {DOWNLOAD_ARCHIVE} -C {DOWNLOAD_DIR}");
+		RunCMake($"{DOWNLOAD_DIR}astyle");
 		#else
-		Tar.ExtractTarGz(DOWNLOAD_ARCHIVE, Application.dataPath + "/UniFmt");
+		DoDOSCommand($"expand {DOWNLOAD_ARCHIVE} {DOWNLOAD_DIR}")
 		#endif
 	}
 
+	private static void RunCMake(string sourceDir) {
+		DoBashCommand($"/usr/local/bin/cmake {sourceDir}");
+		var env = System.Environment.CurrentDirectory;
+		DoBashCommand($"/usr/bin/make");
+		Directory.Move(env + "/CMakeFiles", DOWNLOAD_DIR + "astyle/CMakeFiles");
+		File.Move(env + "/CMakeCache.txt", DOWNLOAD_DIR + "astyle/CMakeCache.txt");
+		File.Move(env + "/Makefile", DOWNLOAD_DIR + "astyle/Makefile");
+		File.Move(env + "/cmake_install.cmake", DOWNLOAD_DIR + "astyle/cmake_install.cmake");
+		File.Move(env + "/astyle", DOWNLOAD_DIR + "astyle/astyle");
+		PlayerPrefs.SetString(ASTYLE_PATH_KEY, DOWNLOAD_DIR + "astyle/astyle");
+		PlayerPrefs.Save();
+	}
+
 	private static void CreateDefaultSetting() {
-		if(File.Exists(FORMAT_SETTING)) {
+		if (File.Exists(FORMAT_SETTING)) {
 			return;
 		}
+
 		var strBuf = new System.Text.StringBuilder();
 		strBuf.AppendLine("#");
 		strBuf.AppendLine("# CodeFormat.cs で使用されます。");
@@ -280,6 +294,10 @@ public class UniFmtEditor : EditorWindow {
 		}
 	}
 
+	//
+	// Shell Utility
+	//
+
 	static void DoCrossPlatformCommand(string cmd) {
 		#if UNITY_STANDALONE_OSX || UNITY_STANDALONE_LINUX
 		DoBashCommand(cmd);
@@ -289,37 +307,47 @@ public class UniFmtEditor : EditorWindow {
 	}
 
 	static void DoBashCommand(string cmd) {
+		ShellExec(CreateBashProcess(cmd));
+	}
+
+	private static Process CreateBashProcess(string cmd) {
 		var p = new Process();
 		p.StartInfo.FileName = "/bin/bash";
 		p.StartInfo.Arguments = "-c \" " + cmd + " \"";
 		p.StartInfo.UseShellExecute = false;
 		p.StartInfo.RedirectStandardOutput = true;
 		p.StartInfo.RedirectStandardError = true;
-		p.Start();
-		var output = p.StandardOutput.ReadToEnd();
-		var error = p.StandardError.ReadToEnd();
-		p.WaitForExit();
-		p.Close();
-		LogResult(output, error);
+		return p;
 	}
 
 	static void DoDOSCommand(string cmd) {
+		ShellExec(CreateDOSProcess(cmd));
+	}
+
+	private static Process CreateDOSProcess(string cmd) {
 		var p = new Process();
-		//p.StartInfo.FileName = "cmd.exe";
 		p.StartInfo.FileName = System.Environment.GetEnvironmentVariable("ComSpec");
 		p.StartInfo.Arguments = "/c \" " + cmd + " \"";
 		p.StartInfo.UseShellExecute = false;
 		p.StartInfo.RedirectStandardOutput = true;
 		p.StartInfo.RedirectStandardError = true;
-		p.Start();
-		var output = p.StandardOutput.ReadToEnd();
-		var error = p.StandardError.ReadToEnd();
-		p.WaitForExit();
-		p.Close();
-		LogResult(output, error);
+		return p;
 	}
 
-	private static void LogResult(string output, string error) {
+	private static void ShellExec(Process p) {
+		ShellExecGet(p, out var output, out var error);
+		ShowResult(output, error);
+	}
+
+	private static void ShellExecGet(Process p, out string output, out string error) {
+		p.Start();
+		output = p.StandardOutput.ReadToEnd();
+		error = p.StandardError.ReadToEnd();
+		p.WaitForExit();
+		p.Close();
+	}
+
+	private static void ShowResult(string output, string error) {
 		if (output.Length > 0) {
 			UnityEngine.Debug.Log(output);
 		}
