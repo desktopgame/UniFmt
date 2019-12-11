@@ -76,7 +76,7 @@ public class UniFmtEditor : EditorWindow {
 		DoBashCommand($"tar -xzf {DOWNLOAD_ARCHIVE} -C {DOWNLOAD_DIR}");
 		RunCMake($"{DOWNLOAD_DIR}astyle");
 		#else
-		DoDOSCommand($"expand {DOWNLOAD_ARCHIVE} {DOWNLOAD_DIR}")
+		DoDOSCommand($"expand {DOWNLOAD_ARCHIVE} {DOWNLOAD_DIR}");
 		PlayerPrefs.SetString(ASTYLE_PATH_KEY, DOWNLOAD_DIR + "astyle\\bin\\astyle.exe");
 		PlayerPrefs.Save();
 		#endif
