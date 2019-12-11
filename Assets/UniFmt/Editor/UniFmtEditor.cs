@@ -36,6 +36,9 @@ public class UniFmtEditor : EditorWindow {
 			#endif
 		}
 	}
+	private static string LOCK_FILE {
+		get { return Application.dataPath + "/UniFmt/Cache/lock.txt"; }
+	}
 
 	[MenuItem("Assets/UniFmt/Help")]
 	static void ShowHelp() {
@@ -49,18 +52,21 @@ public class UniFmtEditor : EditorWindow {
 
 	[MenuItem("Assets/UniFmt/Setup")]
 	static void Setup() {
+		if(Directory.Exists(Path.GetDirectoryName(LOCK_FILE)) && File.Exists(LOCK_FILE)) {
+			UnityEngine.Debug.Log("please remove UniFmt/Cache/lock.txt if execute setup");
+			return;
+		}
 		DownloadAstyle();
 		CreateDefaultSetting();
+		File.Create(LOCK_FILE);
 		AssetDatabase.Refresh();
 	}
 
 	private static void DownloadAstyle() {
 		UnityEngine.Debug.Log("Download Astyle...");
-
 		if (!Directory.Exists(DOWNLOAD_DIR)) {
 			Directory.CreateDirectory(DOWNLOAD_DIR);
 		}
-
 		// download astyle
 		var cli = new WebClient();
 		byte[] data = cli.DownloadData("https://sourceforge.net/projects/astyle/files/latest/download");
