@@ -39,6 +39,15 @@ public class UniFmtEditor : EditorWindow {
 	private static string LOCK_FILE {
 		get { return Application.dataPath + "/UniFmt/Cache/lock.txt"; }
 	}
+	private static string DOWNLOAD_URL {
+		get {
+			#if UNITY_STANDALONE_OSX || UNITY_STANDALONE_LINUX
+			return "https://sourceforge.net/projects/astyle/files/latest/download";
+			#else
+			return "https://sourceforge.net/projects/astyle/files/astyle/astyle%203.1/AStyle_3.1_windows.zip/download";
+			#endif
+		}
+	}
 
 	[MenuItem("Assets/UniFmt/Help")]
 	static void ShowHelp() {
@@ -69,16 +78,23 @@ public class UniFmtEditor : EditorWindow {
 		}
 		// download astyle
 		var cli = new WebClient();
-		byte[] data = cli.DownloadData("https://sourceforge.net/projects/astyle/files/latest/download");
+		byte[] data = cli.DownloadData(DOWNLOAD_URL);
 		File.WriteAllBytes(DOWNLOAD_ARCHIVE, data);
 		//unzip
 		#if UNITY_STANDALONE_OSX || UNITY_STANDALONE_LINUX
 		DoBashCommand($"tar -xzf {DOWNLOAD_ARCHIVE} -C {DOWNLOAD_DIR}");
 		RunCMake($"{DOWNLOAD_DIR}astyle");
 		#else
-		DoDOSCommand($"expand {DOWNLOAD_ARCHIVE} {DOWNLOAD_DIR}");
 		PlayerPrefs.SetString(ASTYLE_PATH_KEY, DOWNLOAD_DIR + "astyle\\bin\\astyle.exe");
 		PlayerPrefs.Save();
+		// show dialog
+		EditorUtility.DisplayDialog(
+			"- UniFmt -",
+			"please unzip `data.zip`",
+			"OK",
+			"Cancel"
+		);
+		Process.Start("explorer", $"{DOWNLOAD_DIR}");
 		#endif
 	}
 
