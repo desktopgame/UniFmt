@@ -96,7 +96,8 @@ public class UniFmtEditor : EditorWindow {
 			"OK",
 			"Cancel"
 		);
-		Process.Start("explorer", $"\"{DOWNLOAD_DIR}\"");
+		var openPath = Application.dataPath + "/UniFmt/Cache";
+		Process.Start("explorer", $"\"{openPath}\"");
 		#endif
 	}
 
