@@ -6,6 +6,7 @@ using System.Linq;
 using System.IO;
 using System.Diagnostics;
 using System.Threading;
+using System.Net;
 
 /// <summary>
 /// UniFmt is editor extension of able to use program format of `astyle` from GUI.
@@ -23,6 +24,18 @@ public class UniFmtEditor : EditorWindow {
 	private static string FORMAT_SETTING {
 		get { return Application.dataPath + "/UniFmt/Editor/csfmt.txt"; }
 	}
+	private static string DOWNLOAD_DIR {
+		get { return Application.dataPath + "/UniFmt/Cache/"; }
+	}
+	private static string DOWNLOAD_ARCHIVE {
+		get {
+			#if UNITY_STANDALONE_OSX || UNITY_STANDALONE_LINUX
+				return DOWNLOAD_DIR + "data.tar.gz";
+			#else
+				return DOWNLOAD_DIR + "data.zip";
+			#endif
+		}
+	}
 
 	[MenuItem("Assets/UniFmt/Help")]
 	static void ShowHelp() {
@@ -36,8 +49,34 @@ public class UniFmtEditor : EditorWindow {
 
 	[MenuItem("Assets/UniFmt/Setup")]
 	static void Setup() {
+		DownloadAstyle();
+		CreateDefaultSetting();
+		AssetDatabase.Refresh();
+	}
+
+	private static void DownloadAstyle() {
+		if(File.Exists(DOWNLOAD_ARCHIVE)) {
+			return;
+		}
+		UnityEngine.Debug.Log("Download Astyle...");
+		if(!Directory.Exists(DOWNLOAD_DIR)) {
+			Directory.CreateDirectory(DOWNLOAD_DIR);
+		}
+		// download astyle
+		var cli = new WebClient();
+		byte[] data = cli.DownloadData("https://sourceforge.net/projects/astyle/files/latest/download");
+		File.WriteAllBytes(DOWNLOAD_ARCHIVE, data);
+		//unzip
+		#if UNITY_STANDALONE_OSX || UNITY_STANDALONE_LINUX
+		DoBashCommand($"tar -xzf {DOWNLOAD_ARCHIVE} -C {DOWNLOAD_DIR}");
+		#else
+		Tar.ExtractTarGz(DOWNLOAD_ARCHIVE, Application.dataPath + "/UniFmt");
+		#endif
+	}
+
+	private static void CreateDefaultSetting() {
 		if(File.Exists(FORMAT_SETTING)) {
-			File.Delete(FORMAT_SETTING);
+			return;
 		}
 		var strBuf = new System.Text.StringBuilder();
 		strBuf.AppendLine("#");
@@ -77,7 +116,6 @@ public class UniFmtEditor : EditorWindow {
 		strBuf.AppendLine("#カンマの間にスペース");
 		strBuf.AppendLine("pad-comma");
 		File.WriteAllText(FORMAT_SETTING, strBuf.ToString());
-		AssetDatabase.Refresh();
 	}
 
 	[MenuItem("Assets/UniFmt/Format")]
@@ -243,7 +281,7 @@ public class UniFmtEditor : EditorWindow {
 	}
 
 	static void DoCrossPlatformCommand(string cmd) {
-		#if UNITY_STANDALONE_OSX
+		#if UNITY_STANDALONE_OSX || UNITY_STANDALONE_LINUX
 		DoBashCommand(cmd);
 		#else
 		DoDOSCommand(cmd);
