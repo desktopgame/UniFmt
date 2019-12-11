@@ -91,6 +91,10 @@ public class UniFmtEditor : EditorWindow {
 		File.Move(env + "/Makefile", DOWNLOAD_DIR + "astyle/Makefile");
 		File.Move(env + "/cmake_install.cmake", DOWNLOAD_DIR + "astyle/cmake_install.cmake");
 		File.Move(env + "/astyle", DOWNLOAD_DIR + "astyle/astyle");
+		var gitignore = Application.dataPath + "/UniFmt/.gitignore";
+		if(!File.Exists(gitignore)) {
+			File.WriteAllText(gitignore, "Cache\nCache.meta");
+		}
 		PlayerPrefs.SetString(ASTYLE_PATH_KEY, DOWNLOAD_DIR + "astyle/astyle");
 		PlayerPrefs.Save();
 	}
