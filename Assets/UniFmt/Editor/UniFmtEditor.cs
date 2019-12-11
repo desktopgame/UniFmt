@@ -97,6 +97,7 @@ public class UniFmtEditor : EditorWindow {
 			"Cancel"
 		);
 		var openPath = Application.dataPath + "/UniFmt/Cache";
+		openPath = openPath.Replace("/", "\\");
 		Process.Start("explorer", $"\"{openPath}\"");
 		#endif
 	}
