@@ -67,7 +67,9 @@ public class UniFmtEditor : EditorWindow {
 		}
 		DownloadAstyle();
 		CreateDefaultSetting();
+		#if UNITY_STANDALONE_OSX || UNITY_STANDALONE_LINUX
 		File.Create(LOCK_FILE);
+		#endif
 		AssetDatabase.Refresh();
 	}
 
@@ -85,7 +87,7 @@ public class UniFmtEditor : EditorWindow {
 		DoBashCommand($"tar -xzf {DOWNLOAD_ARCHIVE} -C {DOWNLOAD_DIR}");
 		RunCMake($"{DOWNLOAD_DIR}astyle");
 		#else
-		PlayerPrefs.SetString(ASTYLE_PATH_KEY, DOWNLOAD_DIR + "astyle\\bin\\astyle.exe");
+		PlayerPrefs.SetString(ASTYLE_PATH_KEY, DOWNLOAD_DIR + "astyle/bin/astyle.exe");
 		PlayerPrefs.Save();
 		// show dialog
 		EditorUtility.DisplayDialog(
@@ -94,7 +96,7 @@ public class UniFmtEditor : EditorWindow {
 			"OK",
 			"Cancel"
 		);
-		Process.Start("explorer", $"{DOWNLOAD_DIR}");
+		Process.Start("explorer", $"\"{DOWNLOAD_DIR}\"");
 		#endif
 	}
 
